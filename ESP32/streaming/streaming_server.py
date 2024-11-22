@@ -1,15 +1,19 @@
 import socket as soc
 import _thread
 from cam_config import hdr
-from auth import is_authenticated, SECRET_TOKEN
+from auth import is_authenticated
 from wifi import WiFi
 from camera_module import Camera
+from logger import Logger
+
+log = Logger(name="StreamingServer", level="DEBUG")
 
 class StreamingServer:
-    def __init__(self, camera: Camera, wifi: WiFi, port=80):
+    def __init__(self, camera: Camera, wifi: WiFi, SECRET_TOKEN: str, port=80):
         self.camera = camera
         self.wifi = wifi
         self.port = port
+        self.secret_token = SECRET_TOKEN
         self.server_socket = None
 
     def setup_server(self):
@@ -22,19 +26,20 @@ class StreamingServer:
         # Retrieve IP address and print streaming URL
         ip_address = self.wifi.get_ip_address()  # Assuming `get_ip_address()` returns the IP as a string
         if ip_address:
-            print(f"Streaming server started on http://{ip_address}:{self.port}?token={SECRET_TOKEN}")
+            log.info(f"Streaming server started on http://{ip_address}:{self.port}?token={self.secret_token}")
         else:
-            print("Unable to retrieve IP address.")
+            log.error("Unable to retrieve IP address.")
 
     def start_streaming(self):
+        log.info("Starting streaming server...")
         if not self.wifi.is_connected() or not self.camera.is_ready():
-            print("System not ready for streaming.")
+            log.warning("System not ready for streaming.")
             return
 
         self.setup_server()
         while True:
             client_socket, client_address = self.server_socket.accept()
-            print('Request from:', client_address)
+            log.info(f'Request from: {client_address}')
             request = client_socket.recv(200)
 
             if not is_authenticated(request):
@@ -54,7 +59,7 @@ class StreamingServer:
                     put(self.camera.capture_image())
                     put(b'\r\n')  # Send and flush the buffer
                 except Exception as e:
-                    print("TCP send error:", e)
+                    log.error("TCP send error:", e)
                     client_socket.close()
                     break
 

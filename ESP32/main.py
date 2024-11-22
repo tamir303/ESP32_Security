@@ -1,24 +1,9 @@
-# main.py
-from camera_module import Camera
-from wifi import WiFi
-from auth import AP, PW
-from streaming_server import StreamingServer
+from network_access import start_web_server as start_portal_ap
+from start import start as start_main_server
 
 def main():
-    # Initialize WiFi and Camera
-    wifi = WiFi(AP, PW)
-    camera = Camera()
-
-    if wifi.connect() and camera.is_ready():
-        # Initialize and start the streaming server in a separate thread
-        streaming_server = StreamingServer(camera, wifi)
-        streaming_server.start()
-    else:
-        if not wifi.is_connected():
-            print("WiFi not connected.")
-        if not camera.is_ready():
-            print("Camera not ready. Please do machine.reset()")
-        print("System not ready. Please restart")
-
+    start_portal_ap()
+    # start_main_server()
+    
 if __name__ == "__main__":
     main()

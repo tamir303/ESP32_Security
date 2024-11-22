@@ -114,7 +114,7 @@ ai_thinker = {PIN_PWDN:32,
 hdr = {
   # live stream -
   # URL: /live
-  'stream': """HTTP/1.1 200 OK
+  'stream': b"""HTTP/1.1 200 OK
 Content-Type: multipart/x-mixed-replace; boundary=kaki5
 Connection: keep-alive
 Cache-Control: no-cache, no-store, max-age=0, must-revalidate
